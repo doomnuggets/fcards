@@ -1,6 +1,7 @@
 #ifndef __CARD_H
 #define __CARD_H
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -19,25 +20,39 @@ struct Card {
 void free_card(Card *c) {
     free(c->question);
     free(c->answer);
-    c->prev = NULL;
-    c->next = NULL;
     free(c);
 }
 
-// TODO: Check memory errors
 Card *new_card(char *question, char *answer) {
     Card *c = malloc(sizeof(Card));
     if(!c) {
         return NULL;
     }
-    c->question = calloc(MAX_CARD_QUESTION, sizeof(char));
-    c->answer = calloc(MAX_CARD_ANSWER, sizeof(char));
+    c->question = calloc(MAX_CARD_QUESTION+1, sizeof(char));
+    if(c->question == NULL) {
+        free_card(c);
+        perror("new_card: Failed to allocate space for question.");
+        return NULL;
+    }
+    c->answer = calloc(MAX_CARD_ANSWER+1, sizeof(char));
+    if(c->answer == NULL) {
+        free_card(c);
+        perror("new_card: Failed to allocate memory for answer.");
+        return NULL;
+    }
     strncpy(c->question, question, MAX_CARD_QUESTION);
-    c->question[MAX_CARD_QUESTION-1] = '\0';
     strncpy(c->answer, answer, MAX_CARD_ANSWER);
-    c->answer[MAX_CARD_ANSWER-1] = '\0';
+    c->prev = NULL;
+    c->next = NULL;
 
     return c;
 }
+
+void print_card(Card *c) {
+    printf("Question:\n%s\n", c->question);
+    printf("Answer:\n%s\n", c->answer);
+}
+
+
 
 #endif

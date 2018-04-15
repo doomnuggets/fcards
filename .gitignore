@@ -1,3 +1,6 @@
 ccards
 peda-*
 .gdb*
+decks/*
+!decks/test
+_test

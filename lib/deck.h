@@ -5,10 +5,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <errno.h>
+#include <fts.h>
+#include <time.h>
 
 #include "errors.h"
 #include "constants.h"
 #include "card.h"
+#include "util.h"
 
 typedef struct Deck {
     char *name;
@@ -17,31 +21,57 @@ typedef struct Deck {
     unsigned long num_of_cards;
 } Deck;
 
+bool is_deck_empty(Deck *d) {
+    return (d->top == NULL && d->bottom == NULL);
+}
 
-// TODO:
-// Pick a random card from the passed deck.
-Card *get_random_card(Deck *d) {
-    Card *c = NULL;
-    return c;
+// Free a deck with all it's cards and information.
+void free_deck(Deck *d) {
+    // Free all cards.
+    while(d->top != NULL) {
+        Card *tmp = d->top;
+        d->top = d->top->next;
+        tmp->next = NULL;
+        tmp->prev = NULL;
+        free_card(tmp);
+    }
+
+    // Free the meta.
+    free(d->name);
+    d->top = NULL;
+    d->bottom = NULL;
+    d->num_of_cards = 0;
+
+    // Free the deck.
+    free(d);
 }
 
 // TODO: Check memory errors
 Deck *new_deck(char *name) {
     Deck *d = malloc(sizeof(Deck));
+    if(d == NULL) {
+        perror("Failed to allocate space for a new deck.");
+        return NULL;
+    }
     d->name = calloc(MAX_DECK_NAME, sizeof(char));
+    if(d->name == NULL) {
+        perror("Failed to allocate space for the deck name.");
+        free_deck(d);
+        return NULL;
+    }
     strncpy(d->name, name, MAX_DECK_NAME);
     d->name[MAX_DECK_NAME-1] = '\0';
+    d->top = NULL;
+    d->bottom = NULL;
+    d->num_of_cards = 0;
     return d;
 }
 
-bool is_deck_empty(Deck *d) {
-    return (d->top != NULL || d->bottom != NULL);
-}
 
 bool is_top_card(Card *c, Deck *d) {
     if(d->top == c) {
         return true;
-    } else if(c->next != NULL, c->prev == NULL) {
+    } else if(c->next != NULL && c->prev == NULL) {
         return true;
     }
     return false;
@@ -63,22 +93,38 @@ int insert_card(Card *c, unsigned long index, Deck *d) {
     if(d == NULL) {
         return INVALID_DECK;
     }
+
     d->num_of_cards++;
+    return 0;
 }
 
 // Get a card by index from the deck.
-Card *get_card(unsigned long index, Deck *d) {
+Card *get_card(unsigned int index, Deck *d) {
     if(index+1 > d->num_of_cards)
         return NULL;
     if(d == NULL)
         return NULL;
 
-    unsigned long matched_index = 0;
+    unsigned int matched_index;
     Card *c = d->top;
-    while((c = c->next) != NULL && matched_index < index) {
-        matched_index++;
+    if(index == 0)
+        return c;
+
+    for(matched_index = 0; matched_index < index; matched_index++) {
+        if(c->next == NULL) {
+            perror("get_card: Card not found!");
+            return NULL;
+        }
+        c = c->next;
     }
     return c;
+}
+
+// Pick a random card from the passed deck.
+// You should call srand(time(NULL)); yourself before calling this function.
+Card *pick_random_card(Deck *d) {
+    int random_index = rand() % d->num_of_cards;
+    return get_card(random_index, d);
 }
 
 // Add a card to the top of the deck.
@@ -95,8 +141,13 @@ int push_card_top(Card *c, Deck *d) {
     }
     c->next = old_top_card;
     c->prev = NULL;
+    if(is_deck_empty(d)) {
+        d->bottom = c;
+    }
     d->top = c;
     d->num_of_cards++;
+
+    return 0;
 }
 
 // Add a card to the bottom of the deck.
@@ -113,8 +164,13 @@ int push_card_bottom(Card *c, Deck *d) {
     }
     c->next = NULL;
     c->prev = old_bottom_card;
+    if(is_deck_empty(d)) {
+        d->top = c;
+    }
     d->bottom = c;
     d->num_of_cards++;
+
+    return 0;
 }
 
 // Remove a card from the deck. This calls `free_card` and thus removes it.
@@ -132,7 +188,7 @@ int remove_card(unsigned long index, Deck *d) {
     // Find the card to delete.
     Card *c = d->top;
     unsigned long matched_index = 0;
-    for(matched_index; matched_index < index; matched_index++) {
+    for(; matched_index < index; matched_index++) {
         if(c->next != NULL) {
             c = c->next;
         } else {
@@ -164,27 +220,9 @@ int remove_card(unsigned long index, Deck *d) {
     return 0;
 }
 
-// Free a deck with all it's cards and information.
-void free_deck(Deck *d) {
-    // Free all cards.
-    while(d->top != NULL) {
-        Card *tmp = d->top;
-        d->top = d->top->next;
-        tmp->next = NULL;
-        tmp->prev = NULL;
-        free_card(tmp);
-    }
-
-    // Free the meta.
-    free(d->name);
-    d->top = NULL;
-    d->bottom = NULL;
-    d->num_of_cards = 0;
-    free(d->top);
-    free(d->bottom);
-
-    // Free the deck.
-    free(d);
+int _compare(const FTSENT **one, const FTSENT **two) {
+    return (strcmp((*one)->fts_name, (*two)->fts_name));
 }
+
 
 #endif
