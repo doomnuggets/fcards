@@ -1,0 +1,8 @@
+#ifndef __CONSTANTS_H
+#define __CONSTANTS_H
+
+int MAX_DECK_NAME = 256;
+int MAX_CARD_QUESTION = 401;
+int MAX_CARD_ANSWER = 401;
+
+#endif
