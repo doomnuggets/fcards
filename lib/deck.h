@@ -21,6 +21,7 @@ typedef struct Deck {
     unsigned long num_of_cards;
 } Deck;
 
+// Check if the deck contains no cards.
 bool is_deck_empty(Deck *d) {
     return (d->top == NULL && d->bottom == NULL);
 }
@@ -46,7 +47,7 @@ void free_deck(Deck *d) {
     free(d);
 }
 
-// TODO: Check memory errors
+// Create a new deck.
 Deck *new_deck(char *name) {
     Deck *d = malloc(sizeof(Deck));
     if(d == NULL) {
@@ -59,15 +60,14 @@ Deck *new_deck(char *name) {
         free_deck(d);
         return NULL;
     }
-    strncpy(d->name, name, MAX_DECK_NAME);
-    d->name[MAX_DECK_NAME-1] = '\0';
+    strncpy(d->name, name, MAX_DECK_NAME-1);
     d->top = NULL;
     d->bottom = NULL;
     d->num_of_cards = 0;
     return d;
 }
 
-
+// Check if the passed card is the card on the top.
 bool is_top_card(Card *c, Deck *d) {
     if(d->top == c) {
         return true;
@@ -77,6 +77,7 @@ bool is_top_card(Card *c, Deck *d) {
     return false;
 }
 
+// Check if the passed card is the card on the bottom.
 bool is_bottom_card(Card *c, Deck *d) {
     if(d->bottom == c) {
         return true;
@@ -86,6 +87,7 @@ bool is_bottom_card(Card *c, Deck *d) {
     return false;
 }
 
+// Insert a card at a specific index in the given deck.
 int insert_card(Card *c, unsigned long index, Deck *d) {
     if(c == NULL) {
         return INVALID_CARD;
@@ -219,10 +221,5 @@ int remove_card(unsigned long index, Deck *d) {
     d->num_of_cards--;
     return 0;
 }
-
-int _compare(const FTSENT **one, const FTSENT **two) {
-    return (strcmp((*one)->fts_name, (*two)->fts_name));
-}
-
 
 #endif

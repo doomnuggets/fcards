@@ -10,6 +10,9 @@
 #include "card.h"
 
 
+int _compare(const FTSENT **one, const FTSENT **two) {
+    return strcmp((*one)->fts_name, (*two)->fts_name);
+}
 
 // Parse a file into a card.
 Card *parse_card(FILE *card_file) {
@@ -28,8 +31,9 @@ Card *parse_card(FILE *card_file) {
     return new_card(question, answer);
 }
 
-// TODO
-char *list_decks(char *deck_path) {
+// TODO:
+//
+char **list_decks(char *deck_path) {
     return NULL;
 }
 

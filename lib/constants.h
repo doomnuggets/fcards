@@ -8,6 +8,11 @@
 #define MAX_CARD_ANSWER 4096
 #define MAX_CARD_CONTENT 81930
 
+// lib/view.h
+#define NAVIGATION_MAX_WIDTH 22
+#define CONTENT_MAX_WIDTH 190
+#define FOOTER_MAX_HEIGHT 2
+
 const char ANSWER_MARKER[] = "-xxx-";
 
 #endif

@@ -53,6 +53,4 @@ void print_card(Card *c) {
     printf("Answer:\n%s\n", c->answer);
 }
 
-
-
 #endif
