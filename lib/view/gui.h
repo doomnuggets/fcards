@@ -41,7 +41,6 @@ void free_gui(GUI *gui) {
 
 /// Prepare the GUI structure and return a pointer to it.
 GUI *new_gui() {
-    initscr();
     GUI *gui = malloc(sizeof(GUI));
     if(gui == NULL) {
         perror("Failed to initialize the GUI. (malloc)");
@@ -78,35 +77,63 @@ GUI *new_gui() {
 
 /// Refresh all windows.
 void wrefresh_all(GUI *gui) {
+    wrefresh(stdscr);
     wrefresh(gui->navigation);
     wrefresh(gui->content);
     wrefresh(gui->footer);
-    wrefresh(stdscr);
 }
+
+void draw_borders(GUI *gui) {
+    int x;
+    int y;
+    getyx(stdscr, y, x);
+
+    wmove(stdscr, 0, CONTENT_START_X);
+    vline(0, gui->max_height);
+
+    wmove(stdscr, gui->max_height - FOOTER_MAX_HEIGHT, 0);
+    hline(0, gui->max_height);
+
+    move(y, x);
+}
+
 
 //// Resize all windows. Used when the terminal changes it's dynamics.
 // Signal handler SIGWCH
 void resize(GUI *gui) {
     // TODO
+    draw_borders(gui);
     wrefresh_all(gui);
 }
 
 /// Render all loaded decks in the navigation window.
 void render_navigation(GUI *gui, Deck **decks) {
+    move(0, 0);
     if(decks == NULL) {
         wprintw(gui->navigation, 0, 0, "No decks found.");
-        wrefresh(gui->navigation);
-        return;
     }
+    else {
+        // TODO: Actually build the menu for the deck selection.
+        for(int y_coord = 1; y_coord < gui->max_height; y_coord++) {
+            wmove(gui->navigation, y_coord, 2);
+            wprintw(gui->navigation, "Deck 112312312");
+        }
+    }
+    wrefresh(gui->navigation);
 }
 
 /// Render a card in the content window.
 void render_content(GUI *gui, Card *card) {
     if(card == NULL) {
         wprintw(gui->content, 0, 0, "Deck is empty.");
-        wrefresh(gui->content);
-        return;
     }
+    else {
+    }
+    wrefresh(gui->content);
+}
+
+void render_footer(GUI *gui) {
+    wrefresh(gui->footer);
 }
 
 #endif

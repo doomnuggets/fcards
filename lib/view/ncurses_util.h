@@ -5,7 +5,6 @@
 
 #include <ncurses.h>
 
-
 void destroy_win(WINDOW *local_win) {
 	wborder(local_win, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
 	/* The parameters taken are

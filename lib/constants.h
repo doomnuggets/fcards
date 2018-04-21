@@ -10,9 +10,11 @@
 
 // lib/view.h
 #define NAVIGATION_MAX_WIDTH 22
+#define CONTENT_START_X 23
 #define CONTENT_MAX_WIDTH 190
 #define FOOTER_MAX_HEIGHT 2
 
 const char ANSWER_MARKER[] = "-xxx-";
+const char EXIT_CHAR = 'q';
 
 #endif
