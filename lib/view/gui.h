@@ -83,16 +83,38 @@ void wrefresh_all(GUI *gui) {
     wrefresh(gui->footer);
 }
 
-void draw_borders(GUI *gui) {
+void draw_gui(GUI *gui) {
     int x;
     int y;
     getyx(stdscr, y, x);
 
-    wmove(stdscr, 0, CONTENT_START_X);
-    vline(0, gui->max_height);
+    init_pair(1, COLOR_BLUE, COLOR_BLACK); // vertical blue line.
+    init_pair(2, COLOR_BLUE, COLOR_BLUE); // horizontal blue bar.
+    init_pair(3, COLOR_WHITE, COLOR_BLUE); // white text with blue background.
 
+    // Draw the top most horizontal bar.
+    wmove(stdscr, 0, 0);
+    attron(COLOR_PAIR(2));
+    hline(0, gui->max_width);
+    attroff(COLOR_PAIR(2));
+
+    // Draw the title.
+    attron(COLOR_PAIR(3));
+    mvprintw(0, 0, "C-Cards v%s", VERSION);
+    attroff(COLOR_PAIR(3));
+
+    // Draw the vertical bar which separates navigation from content.
+    wmove(stdscr, 1, CONTENT_START_X);
+    attron(COLOR_PAIR(1));
+    vline(0, gui->max_height - FOOTER_MAX_HEIGHT);
+    attroff(COLOR_PAIR(1));
+
+    // Draw the horizontal footer bar which separates navigation and content
+    // from the footer.
     wmove(stdscr, gui->max_height - FOOTER_MAX_HEIGHT, 0);
-    hline(0, gui->max_height);
+    attron(COLOR_PAIR(2));
+    hline(0, gui->max_width);
+    attroff(COLOR_PAIR(2));
 
     move(y, x);
 }
@@ -102,7 +124,7 @@ void draw_borders(GUI *gui) {
 // Signal handler SIGWCH
 void resize(GUI *gui) {
     // TODO
-    draw_borders(gui);
+    draw_gui(gui);
     wrefresh_all(gui);
 }
 

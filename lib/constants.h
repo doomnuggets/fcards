@@ -16,5 +16,6 @@
 
 const char ANSWER_MARKER[] = "-xxx-";
 const char EXIT_CHAR = 'q';
+const char VERSION[] = "0.1";
 
 #endif

@@ -20,12 +20,13 @@ int main(int argc, char *argv[]) {
 	clear();
 	noecho();
 	cbreak();
+    start_color();
 
     GUI *gui = new_gui();
+    draw_gui(gui);
     render_navigation(gui, decks);
     render_content(gui, NULL);
     render_footer(gui);
-    draw_borders(gui);
     wrefresh_all(gui);
 
     char input_char = ' ';
