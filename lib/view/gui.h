@@ -100,7 +100,7 @@ void draw_gui(GUI *gui) {
 
     // Draw the title.
     attron(COLOR_PAIR(3));
-    mvprintw(0, 0, "C-Cards v%s", VERSION);
+    print_center(stdscr, 0, 0, gui->max_width, "C-Cards");
     attroff(COLOR_PAIR(3));
 
     // Draw the vertical bar which separates navigation from content.

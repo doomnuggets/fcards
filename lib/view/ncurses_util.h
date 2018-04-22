@@ -39,7 +39,6 @@ void print_center(WINDOW *win, int starty, int startx, int width, char *string) 
 	length = strlen(string);
 	x = startx + (int)((width - length) / 2);
 	mvwprintw(win, y, x, "%s", string);
-	refresh();
 }
 
 // Print a text on multiple lines without exceeding the window bounds.
