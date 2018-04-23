@@ -41,10 +41,32 @@ void print_center(WINDOW *win, int starty, int startx, int width, char *string) 
 	mvwprintw(win, y, x, "%s", string);
 }
 
-// Print a text on multiple lines without exceeding the window bounds.
-// Words are split by spaces, sentences by a simple newline.
-void print_wrapped(WINDOW *win, int starty, int startx, int max_width, int max_height, char *string) {
-    // TODO
+int wordlen(const char *str) {
+    int tempindex = 0;
+    while(str[tempindex] != ' ' && str[tempindex] != 0 && str[tempindex] != '\n') {
+        ++tempindex;
+    }
+
+    return tempindex;
 }
 
+// Wrap a paragraph to a given max width.
+void word_wrap(char *s, const int wrapline) {
+    int index = 0;
+    int curlinelen = 0;
+    while(s[index] != '\0') {
+        if(s[index] == '\n') {
+            curlinelen = 0;
+        }
+        else if(s[index] == ' ') {
+            if(curlinelen + wordlen(&s[index+1]) >= wrapline) {
+                s[index] = '\n';
+                curlinelen = 0;
+            }
+        }
+
+        curlinelen++;
+        index++;
+    }
+}
 #endif

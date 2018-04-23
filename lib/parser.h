@@ -77,12 +77,4 @@ Deck *parse_deck(char *deck_path) {
     return deck;
 }
 
-Deck **parse_decks(const char *deck_dir, const int max_decks) {
-    Deck **decks = malloc(sizeof(Deck)*max_decks);
-    for(int i = 0; i < max_decks; i++) {
-        // Iterate over all deck directories and parse the decks.
-        continue;
-    }
-}
-
 #endif

@@ -16,35 +16,33 @@ int main(int argc, char *argv[]) {
 
     Deck *decks[] = {deck, NULL};
 
-    initscr();
+    WINDOW *default_window = initscr();
 	clear();
 	noecho();
 	cbreak();
     start_color();
 
-    GUI *gui = new_gui();
+    GUI *gui = new_gui(decks);
     draw_gui(gui);
-    render_navigation(gui, decks);
-    render_content(gui, NULL);
-    render_footer(gui);
     wrefresh_all(gui);
 
-    char input_char = ' ';
+    int input_char = ' ';
     WINDOW *active_window = gui->navigation;
     wmove(active_window, 1, 1);
+    Deck *active_deck = decks[0];
+    Card *active_card = active_deck->top;
+    int answer_hidden = 1;
+    char *content_buffer = calloc(MAX_CARD_CONTENT, sizeof(char));
     while(input_char != EXIT_CHAR) {
         // Switch focus from navigation <-> content window.
         input_char = wgetch(active_window);
         if(input_char == '\t') {
             if(active_window == gui->navigation) {
                 active_window = gui->content;
-                wmove(active_window, 1, 1);
             }
             else {
                 active_window = gui->navigation;
-                wmove(active_window, 1, CONTENT_START_X+1);
             }
-            wrefresh(active_window);
             continue;
         }
         else if(input_char == 'q') {
@@ -53,17 +51,57 @@ int main(int argc, char *argv[]) {
 
         // Handle menu navigation mapping
         if(active_window == gui->navigation) {
-
+            switch(input_char) {
+                case KEY_DOWN:
+                case 'j':
+                    menu_driver(gui->menu, REQ_DOWN_ITEM);
+                    break;
+                case KEY_UP:
+                case 'k':
+                    menu_driver(gui->menu, REQ_UP_ITEM);
+                    break;
+            }
         }
         else { // Handle content.
-
+            switch(input_char) {
+                case KEY_RIGHT:
+                case 'l':
+                    // Render the active_card->next card.
+                    active_card = active_card->next;
+                    render_content(gui, active_card, HIDE_ANSWER, content_buffer);
+                    answer_hidden = 1;
+                    memset(content_buffer, '\0', sizeof(char) * MAX_CARD_CONTENT);
+                    break;
+                case KEY_LEFT:
+                case 'h':
+                    // Render the active_card->prev card.
+                    active_card = active_card->prev;
+                    render_content(gui, active_card, HIDE_ANSWER, content_buffer);
+                    answer_hidden = 1;
+                    memset(content_buffer, '\0', sizeof(char) * MAX_CARD_CONTENT);
+                    break;
+                case 'r':
+                    // Render a random card from the active_deck.
+                    active_card = pick_random_card(active_deck);
+                    render_content(gui, active_card, HIDE_ANSWER, content_buffer);
+                    answer_hidden = 1;
+                    memset(content_buffer, '\0', sizeof(char) * MAX_CARD_CONTENT);
+                    break;
+                case ' ':
+                    // Toggle the display of active_card->answer.
+                    render_content(gui, active_card, 1^answer_hidden, content_buffer);
+                    answer_hidden = 1^answer_hidden;
+                    break;
+            }
         }
     }
 
-
-    endwin();
+    free(content_buffer);
     free_gui(gui);
     free_deck(deck);
     free(deck_path);
+    delwin(default_window);
+    delwin(stdscr);
+    endwin();
     return 0;
 }
