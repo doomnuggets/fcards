@@ -64,9 +64,21 @@ void word_wrap(char *s, const int wrapline) {
                 curlinelen = 0;
             }
         }
-
         curlinelen++;
         index++;
     }
 }
+
+// Print multiplie lines which were previously wrapped with `word_wrap`.
+void print_wrapped_lines(WINDOW *window, char *s, const int start_y, const int start_x) {
+    char *token = NULL;
+    char *current_haystack = s;
+    int current_y = start_y;
+    while((token = strtok(current_haystack, "\n")) != NULL) {
+        mvwprintw(window, current_y, start_x, token);
+        current_y++;
+        current_haystack = NULL;
+    }
+}
+
 #endif

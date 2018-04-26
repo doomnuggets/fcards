@@ -1,2 +1,2 @@
-+ Render the cards in a semi-humane fashion so we can actually use the tool for what it was made for.
-    + *Maybe it's time to start learning ncurses?*
++ Fix Answer indentation (maybe iterate over each line after the string has been wrapped.)
++ Fix navigation (doesn't render yet)

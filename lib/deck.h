@@ -28,6 +28,8 @@ bool is_deck_empty(Deck *d) {
 
 // Free a deck with all it's cards and information.
 void free_deck(Deck *d) {
+    printf("Freeing Deck @ <%p>\n", d);
+    printf("  \\__ freeing Deck->name @ <%p>\n", d->name);
     // Free all cards.
     while(d->top != NULL) {
         Card *tmp = d->top;
@@ -54,16 +56,19 @@ Deck *new_deck(char *name) {
         perror("Failed to allocate space for a new deck.");
         return NULL;
     }
-    d->name = calloc(MAX_DECK_NAME, sizeof(char));
+    d->name = calloc(MAX_DECK_NAME+1, sizeof(char));
     if(d->name == NULL) {
         perror("Failed to allocate space for the deck name.");
         free_deck(d);
         return NULL;
     }
-    strncpy(d->name, name, MAX_DECK_NAME-1);
+    strncpy(d->name, name, MAX_DECK_NAME);
     d->top = NULL;
     d->bottom = NULL;
     d->num_of_cards = 0;
+
+    printf("Allocated new Deck @ <%p>\n", d);
+    printf("  \\__ name @ <%p>\n", d->name);
     return d;
 }
 

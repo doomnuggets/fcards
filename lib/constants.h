@@ -20,11 +20,16 @@
 #define FOOTER_START_X 0
 #define FOOTER_MAX_HEIGHT 2
 
+// lib/gui_driver.h
+#define REQ_PREV_CARD 101
+#define REQ_NEXT_CARD 202
+#define REQ_RAND_CARD 303
+#define REQ_TOGGLE_ANSWER 404
 #define HIDE_ANSWER 0
 #define SHOW_ANSWER 1
 
+
 const char ANSWER_MARKER[] = "-xxx-";
 const char EXIT_CHAR = 'q';
-const char VERSION[] = "0.1";
 
 #endif
