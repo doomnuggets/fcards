@@ -18,7 +18,6 @@ struct Card {
 };
 
 void free_card(Card *c) {
-    printf("Freeing Card @ <%p>\n", c);
     free(c->question);
     free(c->answer);
     free(c);
@@ -45,11 +44,6 @@ Card *new_card(char *question, char *answer) {
     strncpy(c->answer, answer, MAX_CARD_ANSWER);
     c->prev = NULL;
     c->next = NULL;
-
-
-    printf("Allocated new card @ <%p>\n", c);
-    printf(" \\___ question @ <%p>\n", c->question);
-    printf(" \\___ answer @ <%p>\n", c->answer);
 
     return c;
 }

@@ -1,8 +1,10 @@
+#ifndef __GUI_DRIVER_H
+#define __GUI_DRIVER_H
+
 #include "gui_type.h"
 #include "gui.h"
 #include "../constants.h"
 
-// Handle the content window navigation.
 // Handles the navigation of cards and their content.
 void content_driver(GUI *gui, const int action) {
     if(gui->active_deck == NULL) {
@@ -39,3 +41,5 @@ void content_driver(GUI *gui, const int action) {
             break;
     }
 }
+
+#endif

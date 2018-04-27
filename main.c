@@ -31,7 +31,6 @@ int main(int argc, char *argv[]) {
     gui->active_deck = decks[0];
     gui->active_card = decks[0]->top;
     gui->active_window = gui->navigation;
-    int answer_state = 0;
     while(input_char != EXIT_CHAR) {
         // Switch focus from navigation <-> content window.
         input_char = wgetch(gui->active_window);
@@ -82,11 +81,12 @@ int main(int argc, char *argv[]) {
                     content_driver(gui, REQ_TOGGLE_ANSWER);
                     break;
             }
-            draw_gui(gui);
-            render_navigation(gui);
-            render_content(gui, gui->active_card, answer_state, gui->content_buffer);
-            wrefresh_all(gui);
         }
+
+        draw_gui(gui);
+        render_navigation(gui);
+        render_content(gui, gui->active_card, gui->answer_state, gui->content_buffer);
+        wrefresh_all(gui);
     }
 
     free_gui(gui);

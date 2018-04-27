@@ -118,8 +118,8 @@ GUI *new_gui(Deck **decks) {
 void wrefresh_all(GUI *gui) {
     wrefresh(gui->navigation);
     wrefresh(gui->footer);
-    refresh();
     wrefresh(gui->content);
+    refresh();
 }
 
 void draw_gui(GUI *gui) {
@@ -182,17 +182,17 @@ void render_content(GUI *gui, Card *card, const int show_answer, char *content_b
         mvwprintw(gui->content, 4, 4, "Deck is empty.");
     }
     else {
-        if(show_answer) {
+        if(show_answer == HIDE_ANSWER) { // Only render the question.
+            strncpy(content_buffer, card->question, MAX_CARD_ANSWER);
+            word_wrap(content_buffer, CONTENT_MAX_WIDTH - 10);
+        }
+        else { // Render both the question and the answer.
             strncat(content_buffer, card->question, MAX_CARD_QUESTION);
             strcat(content_buffer, "\n \n \n");
             strncat(content_buffer, card->answer, MAX_CARD_ANSWER-6);
-            word_wrap(content_buffer, CONTENT_MAX_WIDTH - 3);
+            word_wrap(content_buffer, CONTENT_MAX_WIDTH - 10);
         }
-        else {
-            strncpy(content_buffer, card->question, MAX_CARD_ANSWER);
-            word_wrap(content_buffer, CONTENT_MAX_WIDTH - 3);
-        }
-        print_wrapped_lines(gui->content, content_buffer, 4, 4);
+        print_wrapped_lines(gui->content, content_buffer, 4, 10);
     }
 }
 

@@ -15,7 +15,7 @@
 
 #define CONTENT_START_X 52
 #define CONTENT_START_Y 1
-#define CONTENT_MAX_WIDTH 190
+#define CONTENT_MAX_WIDTH 200
 
 #define FOOTER_START_X 0
 #define FOOTER_MAX_HEIGHT 2
@@ -27,7 +27,6 @@
 #define REQ_TOGGLE_ANSWER 404
 #define HIDE_ANSWER 0
 #define SHOW_ANSWER 1
-
 
 const char ANSWER_MARKER[] = "-xxx-";
 const char EXIT_CHAR = 'q';

@@ -28,8 +28,6 @@ bool is_deck_empty(Deck *d) {
 
 // Free a deck with all it's cards and information.
 void free_deck(Deck *d) {
-    printf("Freeing Deck @ <%p>\n", d);
-    printf("  \\__ freeing Deck->name @ <%p>\n", d->name);
     // Free all cards.
     while(d->top != NULL) {
         Card *tmp = d->top;
@@ -67,8 +65,6 @@ Deck *new_deck(char *name) {
     d->bottom = NULL;
     d->num_of_cards = 0;
 
-    printf("Allocated new Deck @ <%p>\n", d);
-    printf("  \\__ name @ <%p>\n", d->name);
     return d;
 }
 
