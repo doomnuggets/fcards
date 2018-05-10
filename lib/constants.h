@@ -1,6 +1,7 @@
 #ifndef __CONSTANTS_H
 #define __CONSTANTS_H
 
+#define MAX_DECKS 20
 #define MAX_DECK_NAME 48
 #define MAX_DECK_PATH 256
 #define MAX_CARD_PATH 256
@@ -28,6 +29,7 @@
 #define HIDE_ANSWER 0
 #define SHOW_ANSWER 1
 
+const char TITLE_FILE[] = "title.txt";
 const char ANSWER_MARKER[] = "-xxx-";
 const char EXIT_CHAR = 'q';
 

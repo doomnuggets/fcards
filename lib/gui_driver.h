@@ -1,13 +1,17 @@
-#ifndef __GUI_DRIVER_H
-#define __GUI_DRIVER_H
+#ifndef __DRIVER_H
+#define __DRIVER_H
 
+#include "deck.h"
 #include "gui_type.h"
 #include "gui.h"
-#include "../constants.h"
+#include "constants.h"
 
 // Handles the navigation of cards and their content.
 void content_driver(GUI *gui, const int action) {
     if(gui->active_deck == NULL) {
+        return;
+    }
+    if(gui->active_card == NULL) {
         return;
     }
 
@@ -40,6 +44,20 @@ void content_driver(GUI *gui, const int action) {
             memset(gui->content_buffer, '\0', sizeof(char) * MAX_CARD_CONTENT);
             break;
     }
+}
+
+// Handle the deck navigation.
+void navigation_driver(GUI *gui, const int action) {
+    if(gui->active_deck == NULL) {
+        return;
+    }
+    if(gui->decks == NULL) {
+        return;
+    }
+
+    menu_driver(gui->menu, action);
+    gui->active_deck = gui->decks[item_index(current_item(gui->menu))];
+    gui->active_card = gui->active_deck->top;
 }
 
 #endif

@@ -31,12 +31,6 @@ Card *parse_card(FILE *card_file) {
     return new_card(question, answer);
 }
 
-// TODO:
-//
-char **list_decks(char *deck_path) {
-    return NULL;
-}
-
 // Parses a directory structure into a deck of cards.
 //
 //  /path/to/deck/[001_card, 002_card, ...]

@@ -2,38 +2,46 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <locale.h>
 
 #include "lib/card.h"
 #include "lib/deck.h"
 #include "lib/parser.h"
-#include "lib/view/gui.h"
-#include "lib/view/gui_driver.h"
+#include "lib/gui.h"
+#include "lib/gui_driver.h"
 
 
 int main(int argc, char *argv[]) {
-    char *deck_path = calloc(MAX_DECK_PATH, sizeof(char));
-    strcpy(deck_path, "/home/me/Documents/code/ccards/decks/test/");
-    Deck *deck = parse_deck(deck_path);
-    Deck *decks[] = {deck, NULL};
+    char deck_path1[] = "/home/me/Documents/code/ccards/decks/wirtschaft";
+    Deck *deck = parse_deck(deck_path1);
+    char deck_path2[] = "/home/me/Documents/code/ccards/decks/test";
+    Deck *deck2 = parse_deck(deck_path2);
+    char deck_path3[] = "/home/me/Documents/code/ccards/decks/gemeinschaft_und_staat";
+    Deck *deck3 = parse_deck(deck_path3);
+    Deck **decks = calloc(MAX_DECKS, sizeof(Deck *));
+    decks[0] = deck;
+    decks[1] = deck2;
+    decks[2] = deck3;
+    decks[3] = NULL;
+
     initscr();
-	clear();
-	noecho();
-	cbreak();
+    clear();
+    noecho();
     curs_set(0);
+    cbreak();
+    keypad(stdscr, TRUE);
     start_color();
+    init_pair(1, COLOR_WHITE, COLOR_BLACK);
 
     GUI *gui = new_gui(decks);
-    draw_gui(gui);
-    render_navigation(gui);
+    gui->active_window = gui->navigation;
+    render_gui(gui);
+    render_content(gui, gui->active_card, HIDE_ANSWER, gui->content_buffer);
     wrefresh_all(gui);
 
     int input_char = ' ';
-    gui->active_deck = decks[0];
-    gui->active_card = decks[0]->top;
-    gui->active_window = gui->navigation;
-    while(input_char != EXIT_CHAR) {
+    while((input_char = wgetch(gui->active_window)) != EXIT_CHAR) {
         // Switch focus from navigation <-> content window.
-        input_char = wgetch(gui->active_window);
         if(input_char == '\t') {
             if(gui->active_window == gui->navigation) {
                 gui->active_window = gui->content;
@@ -41,14 +49,10 @@ int main(int argc, char *argv[]) {
             else {
                 gui->active_window = gui->navigation;
             }
-            draw_gui(gui);
-            render_navigation(gui);
+            render_gui(gui);
             render_content(gui, gui->active_card, HIDE_ANSWER, gui->content_buffer);
             wrefresh_all(gui);
             continue;
-        }
-        else if(input_char == EXIT_CHAR) {
-            break;
         }
 
         // Handle menu navigation mapping.
@@ -56,21 +60,19 @@ int main(int argc, char *argv[]) {
             switch(input_char) {
                 case KEY_DOWN:
                 case 'j':
-                    menu_driver(gui->menu, REQ_DOWN_ITEM);
+                    navigation_driver(gui, REQ_DOWN_ITEM);
                     break;
                 case KEY_UP:
                 case 'k':
-                    menu_driver(gui->menu, REQ_UP_ITEM);
+                    navigation_driver(gui, REQ_UP_ITEM);
                     break;
             }
         }
         else { // Handle the content display.
             switch(input_char) {
-                case KEY_RIGHT:
                 case 'l':
                     content_driver(gui, REQ_NEXT_CARD);
                     break;
-                case KEY_LEFT:
                 case 'h':
                     content_driver(gui, REQ_PREV_CARD);
                     break;
@@ -80,18 +82,20 @@ int main(int argc, char *argv[]) {
                 case ' ':
                     content_driver(gui, REQ_TOGGLE_ANSWER);
                     break;
+                default:
+                    continue;
             }
         }
-
-        draw_gui(gui);
-        render_navigation(gui);
+        render_gui(gui);
+        refresh();
         render_content(gui, gui->active_card, gui->answer_state, gui->content_buffer);
         wrefresh_all(gui);
     }
 
     free_gui(gui);
     free_deck(deck);
-    free(deck_path);
+    free_deck(deck2);
+    free_deck(deck3);
     endwin();
     return 0;
 }

@@ -48,9 +48,4 @@ Card *new_card(char *question, char *answer) {
     return c;
 }
 
-void print_card(Card *c) {
-    printf("Question:\n%s\n", c->question);
-    printf("Answer:\n%s\n", c->answer);
-}
-
 #endif

@@ -5,8 +5,8 @@
 #include <menu.h>
 #include <signal.h>
 
-#include "../constants.h"
-#include "../deck.h"
+#include "constants.h"
+#include "deck.h"
 #include "gui_type.h"
 #include "ncurses_util.h"
 #include "menu_builder.h"
@@ -25,35 +25,34 @@
 */
 
 
-/// Deinitialize ncurses and free all windows and the created GUI structure.
+// Deinitialize ncurses and free all windows and the created GUI structure.
 void free_gui(GUI *gui) {
     free(gui->content_buffer);
     destroy_win(gui->navigation);
     destroy_win(gui->content);
     destroy_win(gui->footer);
     unpost_menu(gui->menu);
+    free_menu(gui->menu);
     for(int i = 0; i < gui->num_menu_items; i++) {
         free_item(gui->menu_items[i]);
     }
     free(gui->menu_items);
-    free_menu(gui->menu);
     free(gui);
 }
 
-
 WINDOW *_new_content_window(GUI *gui) {
-    return newwin(gui->max_height - FOOTER_MAX_HEIGHT - 2, CONTENT_MAX_WIDTH, 0, NAVIGATION_MAX_WIDTH + 2);
+    return newwin(gui->max_height - FOOTER_MAX_HEIGHT - 2, CONTENT_MAX_WIDTH-1, 1, NAVIGATION_MAX_WIDTH + 3);
 }
 
 WINDOW *_new_navigation_window(GUI *gui) {
-    return newwin(gui->max_height - FOOTER_MAX_HEIGHT - 2, NAVIGATION_MAX_WIDTH, 0, 0);
+    return newwin(gui->max_height - FOOTER_MAX_HEIGHT - 2, NAVIGATION_MAX_WIDTH, 1, 0);
 }
 
 WINDOW *_new_footer_window(GUI *gui) {
     return newwin(gui->max_height, gui->max_width, gui->max_height - FOOTER_MAX_HEIGHT, 0);
 }
 
-/// Prepare the GUI structure and return a pointer to it.
+// Prepare the GUI structure and return a pointer to it.
 GUI *new_gui(Deck **decks) {
     GUI *gui = calloc(1, sizeof(GUI));
     if(gui == NULL) {
@@ -68,11 +67,18 @@ GUI *new_gui(Deck **decks) {
     gui->navigation = NULL;
     gui->content = NULL;
     gui->footer = NULL;
+    gui->decks = decks;
     gui->active_deck = NULL;
     gui->active_card = NULL;
     gui->active_window = NULL;
     gui->answer_state = HIDE_ANSWER;
-    gui->navigation = _new_navigation_window(gui);
+    gui->menu = NULL;
+    gui->menu_items = NULL;
+
+    if(decks != NULL) {
+        gui->active_deck = decks[0];
+        gui->active_card = gui->active_deck->top;
+    }
 
     gui->content_buffer = calloc(MAX_CARD_CONTENT, sizeof(char));
     if(gui->content_buffer == NULL) {
@@ -81,18 +87,14 @@ GUI *new_gui(Deck **decks) {
         return NULL;
     }
 
-    if(gui->navigation == NULL) {
-        perror("Failed to initialize navigation window.");
-        free_gui(gui);
-        return NULL;
-    }
-
+    keypad(stdscr, TRUE);
     gui->content = _new_content_window(gui);
     if(gui->content == NULL) {
         perror("Failed to initialize content window.");
         free_gui(gui);
         return NULL;
     }
+    keypad(gui->content, TRUE);
 
     gui->footer = _new_footer_window(gui);
     if(gui->footer == NULL) {
@@ -100,15 +102,27 @@ GUI *new_gui(Deck **decks) {
         free_gui(gui);
         return NULL;
     }
+    keypad(gui->footer, TRUE);
 
+    gui->navigation = _new_navigation_window(gui);
+    if(gui->navigation == NULL) {
+        perror("Failed to initialize navigation window.");
+        free_gui(gui);
+        return NULL;
+    }
+    keypad(gui->navigation, TRUE);
     gui->num_menu_items = ARRAY_SIZE(decks);
-    gui->menu_items = calloc(gui->num_menu_items, sizeof(ITEM *));
+    gui->menu_items = calloc(gui->num_menu_items + 1, sizeof(ITEM *));
     if(gui->menu_items == NULL) {
         perror("Failed to allocate memory for menu entries.");
         free_gui(gui);
         return NULL;
     }
-    convert_to_menu_items(decks, gui->menu_items);
+    int item_count = 0;
+    while(gui->decks[item_count] != NULL) {
+        item_count++;
+    }
+    convert_to_menu_items(gui->decks, gui->menu_items, item_count);
     build_menu(gui, gui->menu_items);
 
     return gui;
@@ -116,13 +130,13 @@ GUI *new_gui(Deck **decks) {
 
 /// Refresh all windows.
 void wrefresh_all(GUI *gui) {
-    wrefresh(gui->navigation);
+    refresh();
     wrefresh(gui->footer);
     wrefresh(gui->content);
-    refresh();
+    wrefresh(gui->navigation);
 }
 
-void draw_gui(GUI *gui) {
+void render_gui(GUI *gui) {
     int x;
     int y;
     getyx(stdscr, y, x);
@@ -160,18 +174,14 @@ void draw_gui(GUI *gui) {
 //// TODO: Resize all windows. Used when the terminal changes it's dynamics.
 // Signal handler SIGWCH
 void resize(GUI *gui) {
-    draw_gui(gui);
+    render_gui(gui);
     wrefresh_all(gui);
-}
-
-// Render the navigation.
-void render_navigation(GUI *gui) {
-    post_menu(gui->menu);
 }
 
 /// Render a card in the content window.
 void render_content(GUI *gui, Card *card, const int show_answer, char *content_buffer) {
     destroy_win(gui->content);
+    gui->content = NULL;
     gui->content = _new_content_window(gui);
     if(gui->content == NULL) {
         perror("render_content: Failed to allocate a new content window.");

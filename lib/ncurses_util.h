@@ -18,6 +18,7 @@ void destroy_win(WINDOW *local_win) {
 	 * 8. bl: character to be used for the bottom left corner of the window
 	 * 9. br: character to be used for the bottom right corner of the window
 	 */
+    wclear(local_win);
 	wrefresh(local_win);
 	delwin(local_win);
 }
