@@ -111,18 +111,18 @@ GUI *new_gui(Deck **decks) {
         return NULL;
     }
     keypad(gui->navigation, TRUE);
-    gui->num_menu_items = ARRAY_SIZE(decks);
+    int num_menu_items = 0;
+    while(gui->decks[num_menu_items] != NULL) {
+        num_menu_items++;
+    }
+    gui->num_menu_items = num_menu_items;
     gui->menu_items = calloc(gui->num_menu_items + 1, sizeof(ITEM *));
     if(gui->menu_items == NULL) {
         perror("Failed to allocate memory for menu entries.");
         free_gui(gui);
         return NULL;
     }
-    int item_count = 0;
-    while(gui->decks[item_count] != NULL) {
-        item_count++;
-    }
-    convert_to_menu_items(gui->decks, gui->menu_items, item_count);
+    convert_to_menu_items(gui->decks, gui->menu_items, gui->num_menu_items);
     build_menu(gui, gui->menu_items);
 
     return gui;

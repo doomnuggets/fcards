@@ -8,21 +8,12 @@
 #include "lib/deck.h"
 #include "lib/parser.h"
 #include "lib/gui.h"
-#include "lib/gui_driver.h"
+#include "lib/navigation.h"
 
 
 int main(int argc, char *argv[]) {
-    char deck_path1[] = "/home/me/Documents/code/ccards/decks/wirtschaft";
-    Deck *deck = parse_deck(deck_path1);
-    char deck_path2[] = "/home/me/Documents/code/ccards/decks/test";
-    Deck *deck2 = parse_deck(deck_path2);
-    char deck_path3[] = "/home/me/Documents/code/ccards/decks/gemeinschaft_und_staat";
-    Deck *deck3 = parse_deck(deck_path3);
-    Deck **decks = calloc(MAX_DECKS, sizeof(Deck *));
-    decks[0] = deck;
-    decks[1] = deck2;
-    decks[2] = deck3;
-    decks[3] = NULL;
+    char deck_root[] = "/home/me/Documents/code/ccards/decks";
+    Deck **decks = parse_decks(deck_root);
 
     initscr();
     clear();
@@ -93,9 +84,11 @@ int main(int argc, char *argv[]) {
     }
 
     free_gui(gui);
-    free_deck(deck);
-    free_deck(deck2);
-    free_deck(deck3);
+    for(int i = 0; decks[i] != NULL; i++) {
+        if(decks[i] != NULL) {
+            free_deck(decks[i]);
+        }
+    }
     endwin();
     return 0;
 }

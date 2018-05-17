@@ -49,6 +49,9 @@ void free_deck(Deck *d) {
 
 // Create a new deck.
 Deck *new_deck(char *name) {
+    if(name == NULL) {
+        return NULL;
+    }
     Deck *d = malloc(sizeof(Deck));
     if(d == NULL) {
         perror("Failed to allocate space for a new deck.");

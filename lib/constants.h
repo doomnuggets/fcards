@@ -4,6 +4,7 @@
 #define MAX_DECKS 20
 #define MAX_DECK_NAME 48
 #define MAX_DECK_PATH 256
+#define MAX_CARDS 200
 #define MAX_CARD_PATH 256
 #define MAX_CARD_QUESTION 4096
 #define MAX_CARD_ANSWER 4096
@@ -21,7 +22,7 @@
 #define FOOTER_START_X 0
 #define FOOTER_MAX_HEIGHT 2
 
-// lib/gui_driver.h
+// lib/navigation.h
 #define REQ_PREV_CARD 101
 #define REQ_NEXT_CARD 202
 #define REQ_RAND_CARD 303
@@ -29,7 +30,6 @@
 #define HIDE_ANSWER 0
 #define SHOW_ANSWER 1
 
-const char TITLE_FILE[] = "title.txt";
 const char ANSWER_MARKER[] = "-xxx-";
 const char EXIT_CHAR = 'q';
 

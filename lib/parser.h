@@ -10,9 +10,6 @@
 #include "card.h"
 
 
-int _compare(const FTSENT **one, const FTSENT **two) {
-    return strcmp((*one)->fts_name, (*two)->fts_name);
-}
 
 // Parse a file into a card.
 Card *parse_card(FILE *card_file) {
@@ -31,44 +28,82 @@ Card *parse_card(FILE *card_file) {
     return new_card(question, answer);
 }
 
-// Parses a directory structure into a deck of cards.
+// Parse a directory structure into a deck of cards.
 //
 //  /path/to/deck/[001_card, 002_card, ...]
 //
 Deck *parse_deck(char *deck_path) {
-    FTS *file_system = NULL;
-    FTSENT *node = NULL;
-
-    char *dp[] = {deck_path, NULL};
-    file_system = fts_open(dp, FTS_COMFOLLOW | FTS_NOCHDIR, &_compare);
-    if(file_system == NULL) {
-        perror("parse_deck: Unable to parse deck.");
-        return NULL;
+    char **files = calloc(MAX_CARDS, sizeof(char *));
+    for(int i = 0; i < MAX_CARDS; i++) {
+        files[i] = calloc(PATH_MAX, sizeof(char));
     }
+    files[MAX_CARDS] = NULL;
 
+    file_walk(deck_path, files, MAX_CARDS);
     char *deck_name = filename_from_path(deck_path);
     Deck *deck = new_deck(deck_name);
     if(deck == NULL) {
         return NULL;
     }
-
-    while((node = fts_read(file_system)) != NULL) {
-        // Only parse files inside the deck directory.
-        if(node->fts_info == FTS_F) {
-            FILE *card_file = fopen(node->fts_path, "r");
-            if(card_file == NULL) {
-                continue;
-            }
-            Card *c = parse_card(card_file);
-            if(c != NULL) {
-                push_card_bottom(c, deck);
-            }
-            fclose(card_file);
+    int filename_index = 0;
+    while(files[filename_index] != NULL && filename_index < MAX_CARDS) {
+        FILE *card_file = fopen(files[filename_index], "r");
+        if(card_file == NULL) {
+            break;
         }
+        Card *c = parse_card(card_file);
+        if(c != NULL) {
+            push_card_bottom(c, deck);
+        }
+        fclose(card_file);
+        filename_index++;
     }
 
-    fts_close(file_system);
+    for(int i = 0; i < MAX_CARDS; i++) {
+        free(files[i]);
+    }
+    free(files);
+
     return deck;
 }
+
+// Parse a directory of decks.
+Deck **parse_decks(char *deck_root) {
+    char **deck_dirs = calloc(MAX_DECKS, sizeof(char *));
+    for(int i = 0; i < MAX_DECKS; i++) {
+        deck_dirs[i] = calloc(PATH_MAX, sizeof(char));
+    }
+    deck_dirs[MAX_DECKS] = NULL;
+    dir_walk(deck_root, deck_dirs, MAX_DECKS);
+    Deck **decks = calloc(MAX_DECKS, sizeof(Deck *));
+    for(int i = 0; i < MAX_DECKS; i++) {
+        decks[i] = calloc(1, sizeof(Deck));
+    }
+
+    char deck_path[2048] = {'\0'};
+    int deck_index = 0;
+    while(deck_dirs[deck_index] != NULL && deck_index < MAX_DECKS) {
+        strcpy(deck_path, deck_root);
+        strcat(deck_path, "/");
+        strncat(deck_path, deck_dirs[deck_index], PATH_MAX-1);
+        printf("parsing '%s' into a deck...", deck_dirs[deck_index]);
+        Deck *deck = parse_deck(deck_path);
+        if(deck == NULL) {
+            fprintf(stderr, "Failed to parse deck: %s\n", deck_dirs[deck_index]);
+            break;
+        }
+        decks[deck_index] = deck;
+        deck_index++;
+        memset(deck_path, '\0', 2048);
+    }
+    decks[deck_index] = NULL;
+    for(int i = 0; i < MAX_DECKS; i++) {
+        free(deck_dirs[i]);
+    }
+    free(deck_dirs);
+
+    return decks;
+}
+
 
 #endif

@@ -6,7 +6,7 @@
 #include "gui.h"
 #include "constants.h"
 
-// Handles the navigation of cards and their content.
+// Handle the navigation of cards and their content.
 void content_driver(GUI *gui, const int action) {
     if(gui->active_deck == NULL) {
         return;
