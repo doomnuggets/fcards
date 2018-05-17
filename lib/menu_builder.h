@@ -27,8 +27,9 @@ void build_menu(GUI *gui, ITEM **items) {
         return;
     }
     set_menu_win(gui->menu, gui->navigation);
-    set_menu_sub(gui->menu, derwin(gui->navigation, 12, 40, 1, 1));
+    set_menu_sub(gui->menu, derwin(gui->navigation, 0, 0, 1, 1));
     set_menu_fore(gui->menu, COLOR_PAIR(2));
+    set_menu_mark(gui->menu, "");
     post_menu(gui->menu);
 }
 

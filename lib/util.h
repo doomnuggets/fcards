@@ -23,7 +23,6 @@ char *filename_from_path(char *path) {
     return ++ptr;
 }
 
-
 int _compare(const FTSENT **one, const FTSENT **two) {
     return strcmp((*one)->fts_name, (*two)->fts_name);
 }
@@ -49,12 +48,12 @@ void file_walk(char *path, char *output_paths[], int max_paths) {
 }
 
 void dir_walk(char *path, char *dirs[], int max_dirs) {
-
     DIR *d = opendir(path);
     if(d == NULL) {
         return;
     }
 
+    size_t path_length = strlen(path);
     int i = 0;
     while(i < max_dirs) {
         struct dirent *entry;
@@ -65,11 +64,15 @@ void dir_walk(char *path, char *dirs[], int max_dirs) {
         }
         if(entry->d_type & DT_DIR) {
             if(strcmp(entry->d_name, "..") != 0 && strcmp(entry->d_name, ".") != 0) {
-                strncpy(dirs[i], entry->d_name, sizeof(char) * PATH_MAX);
+                strcpy(dirs[i], path);
+                strcat(dirs[i], "/");
+                strncat(dirs[i], entry->d_name, sizeof(char) * PATH_MAX-path_length-1);
                 i++;
             }
         }
     }
+
+    closedir(d);
 }
 
 #endif

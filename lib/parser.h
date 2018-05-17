@@ -80,21 +80,15 @@ Deck **parse_decks(char *deck_root) {
         decks[i] = calloc(1, sizeof(Deck));
     }
 
-    char deck_path[2048] = {'\0'};
     int deck_index = 0;
     while(deck_dirs[deck_index] != NULL && deck_index < MAX_DECKS) {
-        strcpy(deck_path, deck_root);
-        strcat(deck_path, "/");
-        strncat(deck_path, deck_dirs[deck_index], PATH_MAX-1);
-        printf("parsing '%s' into a deck...", deck_dirs[deck_index]);
-        Deck *deck = parse_deck(deck_path);
+        Deck *deck = parse_deck(deck_dirs[deck_index]);
         if(deck == NULL) {
             fprintf(stderr, "Failed to parse deck: %s\n", deck_dirs[deck_index]);
             break;
         }
         decks[deck_index] = deck;
         deck_index++;
-        memset(deck_path, '\0', 2048);
     }
     decks[deck_index] = NULL;
     for(int i = 0; i < MAX_DECKS; i++) {

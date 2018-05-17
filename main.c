@@ -40,9 +40,6 @@ int main(int argc, char *argv[]) {
             else {
                 gui->active_window = gui->navigation;
             }
-            render_gui(gui);
-            render_content(gui, gui->active_card, HIDE_ANSWER, gui->content_buffer);
-            wrefresh_all(gui);
             continue;
         }
 
@@ -78,8 +75,6 @@ int main(int argc, char *argv[]) {
             }
         }
         render_gui(gui);
-        refresh();
-        render_content(gui, gui->active_card, gui->answer_state, gui->content_buffer);
         wrefresh_all(gui);
     }
 
