@@ -58,6 +58,8 @@ void navigation_driver(GUI *gui, const int action) {
     menu_driver(gui->menu, action);
     gui->active_deck = gui->decks[item_index(current_item(gui->menu))];
     gui->active_card = gui->active_deck->top;
+    render_content(gui, gui->active_card, HIDE_ANSWER, gui->content_buffer);
+    memset(gui->content_buffer, '\0', sizeof(char) * MAX_CARD_CONTENT);
 }
 
 #endif

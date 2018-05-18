@@ -15,6 +15,8 @@ int main(int argc, char *argv[]) {
     char deck_root[] = "/home/me/Documents/code/ccards/decks";
     Deck **decks = parse_decks(deck_root);
 
+    setlocale(LC_ALL, "");
+
     initscr();
     clear();
     noecho();

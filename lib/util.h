@@ -27,6 +27,10 @@ int _compare(const FTSENT **one, const FTSENT **two) {
     return strcmp((*one)->fts_name, (*two)->fts_name);
 }
 
+// Iterate over each file in a directory.
+//      path: The initial directory to walk over.
+//      output_paths: an array of strings which holds the paths to the files.
+//      max_paths: Maximum amount of file paths to store in output_paths.
 void file_walk(char *path, char *output_paths[], int max_paths) {
     FTS *file_system = NULL;
     FTSENT *node = NULL;
@@ -47,6 +51,10 @@ void file_walk(char *path, char *output_paths[], int max_paths) {
     fts_close(file_system);
 }
 
+// Iterate over all directories in a directory.
+//      path: the path to the directory to walk over.
+//      *dirs[]: The char* array will be populated with the found directories.
+//      max_dirs: The maximum amount of dirs to store in the *dirs[] variable.
 void dir_walk(char *path, char *dirs[], int max_dirs) {
     DIR *d = opendir(path);
     if(d == NULL) {
