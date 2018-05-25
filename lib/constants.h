@@ -13,14 +13,10 @@
 // lib/view.h
 #define NAVIGATION_START_X 1
 #define NAVIGATION_START_Y 1
-#define NAVIGATION_MAX_WIDTH 50
-
-#define CONTENT_START_X 52
 #define CONTENT_START_Y 1
-#define CONTENT_MAX_WIDTH 200
-
 #define FOOTER_START_X 0
-#define FOOTER_MAX_HEIGHT 2
+#define CONTENT_PADDING_X 10
+#define CONTENT_PADDING_Y 4
 
 // lib/navigation.h
 #define REQ_PREV_CARD 101

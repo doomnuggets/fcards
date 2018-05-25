@@ -3,19 +3,21 @@
 #include <string.h>
 #include <unistd.h>
 #include <locale.h>
+#include <signal.h>
 
 #include "lib/card.h"
 #include "lib/deck.h"
 #include "lib/parser.h"
 #include "lib/gui.h"
 #include "lib/navigation.h"
+#include "lib/dimensions.h"
 
 
 int main(int argc, char *argv[]) {
+    setlocale(LC_ALL, "");
+
     char deck_root[] = "/home/me/Documents/code/ccards/decks";
     Deck **decks = parse_decks(deck_root);
-
-    setlocale(LC_ALL, "");
 
     initscr();
     clear();
@@ -34,6 +36,9 @@ int main(int argc, char *argv[]) {
 
     int input_char = ' ';
     while((input_char = wgetch(gui->active_window)) != EXIT_CHAR) {
+        if(TERMINAL_RESIZED) {
+            handle_terminal_resize(gui);
+        }
         // Switch focus from navigation <-> content window.
         if(input_char == '\t') {
             if(gui->active_window == gui->navigation) {
@@ -75,6 +80,11 @@ int main(int argc, char *argv[]) {
                 default:
                     continue;
             }
+        }
+
+        if(TERMINAL_RESIZED) {
+            render_content(gui, gui->active_card, gui->answer_state, gui->content_buffer);
+            handle_terminal_resize(gui);
         }
         render_gui(gui);
         wrefresh_all(gui);

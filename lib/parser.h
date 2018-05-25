@@ -33,9 +33,9 @@ Card *parse_card(FILE *card_file) {
 //  /path/to/deck/[001_card, 002_card, ...]
 //
 Deck *parse_deck(char *deck_path) {
-    char **files = calloc(MAX_CARDS, sizeof(char *));
+    char **files = (char **)calloc(MAX_CARDS, sizeof(char *));
     for(int i = 0; i < MAX_CARDS; i++) {
-        files[i] = calloc(PATH_MAX, sizeof(char));
+        files[i] = (char *)calloc(PATH_MAX, sizeof(char));
     }
     files[MAX_CARDS] = NULL;
 
@@ -69,15 +69,15 @@ Deck *parse_deck(char *deck_path) {
 
 // Parse a directory of decks.
 Deck **parse_decks(char *deck_root) {
-    char **deck_dirs = calloc(MAX_DECKS, sizeof(char *));
+    char **deck_dirs = (char **)calloc(MAX_DECKS, sizeof(char *));
     for(int i = 0; i < MAX_DECKS; i++) {
-        deck_dirs[i] = calloc(PATH_MAX, sizeof(char));
+        deck_dirs[i] = (char *)calloc(PATH_MAX, sizeof(char));
     }
     deck_dirs[MAX_DECKS] = NULL;
     dir_walk(deck_root, deck_dirs, MAX_DECKS);
-    Deck **decks = calloc(MAX_DECKS, sizeof(Deck *));
+    Deck **decks = (Deck **)calloc(MAX_DECKS, sizeof(Deck *));
     for(int i = 0; i < MAX_DECKS; i++) {
-        decks[i] = calloc(1, sizeof(Deck));
+        decks[i] = (Deck *)calloc(1, sizeof(Deck));
     }
 
     int deck_index = 0;

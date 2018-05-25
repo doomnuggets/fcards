@@ -10,6 +10,7 @@
 #include "gui_type.h"
 #include "ncurses_util.h"
 #include "menu_builder.h"
+#include "dimensions.h"
 
 /* GUI layout:
 *--------------------------------*
@@ -24,6 +25,12 @@
 *--------------------------------*
 */
 
+
+volatile static sig_atomic_t TERMINAL_RESIZED = 0;
+
+void termina_resize_handler(int sig) {
+    TERMINAL_RESIZED = 1;
+}
 
 // Deinitialize ncurses and free all windows and the created GUI structure.
 void free_gui(GUI *gui) {
@@ -41,29 +48,27 @@ void free_gui(GUI *gui) {
 }
 
 WINDOW *_new_content_window(GUI *gui) {
-    return newwin(gui->max_height - FOOTER_MAX_HEIGHT - 2, CONTENT_MAX_WIDTH-1, 1, NAVIGATION_MAX_WIDTH + 3);
+    return newwin(CONTENT_HEIGHT, CONTENT_WIDTH, 1, NAVIGATION_WIDTH + 2);
 }
 
 WINDOW *_new_navigation_window(GUI *gui) {
-    return newwin(gui->max_height - FOOTER_MAX_HEIGHT - 2, NAVIGATION_MAX_WIDTH, 1, 0);
+    return newwin(NAVIGATION_HEIGHT, NAVIGATION_WIDTH, 1, 0);
 }
 
 WINDOW *_new_footer_window(GUI *gui) {
-    return newwin(gui->max_height, gui->max_width, gui->max_height - FOOTER_MAX_HEIGHT, 0);
+    return newwin(FOOTER_HEIGHT, FOOTER_WIDTH, gui->max_height - FOOTER_HEIGHT, 0);
 }
 
 // Prepare the GUI structure and return a pointer to it.
 GUI *new_gui(Deck **decks) {
-    GUI *gui = calloc(1, sizeof(GUI));
+    GUI *gui = (GUI *)calloc(1, sizeof(GUI));
     if(gui == NULL) {
         perror("new_gui: Failed to mallocate the GUI.");
         return NULL;
     }
 
-    int max_height, max_width;
-    getmaxyx(stdscr, max_height, max_width);
-    gui->max_height = max_height;
-    gui->max_width = max_width;
+    gui->max_height = 0;
+    gui->max_width = 0;
     gui->navigation = NULL;
     gui->content = NULL;
     gui->footer = NULL;
@@ -80,12 +85,14 @@ GUI *new_gui(Deck **decks) {
         gui->active_card = gui->active_deck->top;
     }
 
-    gui->content_buffer = calloc(MAX_CARD_CONTENT, sizeof(char));
+    gui->content_buffer = (char *)calloc(MAX_CARD_CONTENT, sizeof(char));
     if(gui->content_buffer == NULL) {
         perror("Failed to allocate content buffer.");
         free_gui(gui);
         return NULL;
     }
+
+    recalculate_dimensions(gui);
 
     keypad(stdscr, TRUE);
     gui->content = _new_content_window(gui);
@@ -116,7 +123,7 @@ GUI *new_gui(Deck **decks) {
         num_menu_items++;
     }
     gui->num_menu_items = num_menu_items;
-    gui->menu_items = calloc(gui->num_menu_items + 1, sizeof(ITEM *));
+    gui->menu_items = (ITEM **)calloc(gui->num_menu_items + 1, sizeof(ITEM *));
     if(gui->menu_items == NULL) {
         perror("Failed to allocate memory for menu entries.");
         free_gui(gui);
@@ -153,29 +160,22 @@ void render_gui(GUI *gui) {
     // Draw the titles.
     attron(COLOR_PAIR(2));
     mvwprintw(stdscr, 0, 1, "Decks");
-    mvwprintw(stdscr, 0, CONTENT_START_X + 1, "Cards");
+    mvwprintw(stdscr, 0, NAVIGATION_WIDTH + 3, "Cards");
     attroff(COLOR_PAIR(2));
 
-    // Draw the vertical bar which separates navigation from content.
-    wmove(stdscr, 1, CONTENT_START_X);
+    // Draw the vertical bar which separates the navigation from the content.
+    wmove(stdscr, 1, NAVIGATION_WIDTH + 1);
     attron(COLOR_PAIR(3));
-    vline(0, gui->max_height - FOOTER_MAX_HEIGHT - 1);
+    vline(0, gui->max_height - FOOTER_HEIGHT - 1);
     attroff(COLOR_PAIR(3));
 
     // Draw horizontal bar just above the footer.
-    wmove(stdscr, gui->max_height - FOOTER_MAX_HEIGHT - 1, 0);
+    wmove(stdscr, gui->max_height - FOOTER_HEIGHT - 1, 0);
     attron(COLOR_PAIR(1));
     hline(0, gui->max_width);
     attroff(COLOR_PAIR(1));
 
     move(y, x);
-}
-
-//// TODO: Resize all windows. Used when the terminal changes it's dynamics.
-// Signal handler SIGWCH
-void resize(GUI *gui) {
-    render_gui(gui);
-    wrefresh_all(gui);
 }
 
 /// Render a card in the content window.
@@ -189,21 +189,28 @@ void render_content(GUI *gui, Card *card, const int show_answer, char *content_b
         return;
     }
     if(card == NULL) {
-        mvwprintw(gui->content, 4, 4, "Deck is empty.");
+        mvwprintw(gui->content, CONTENT_PADDING_Y, CONTENT_PADDING_X, "Deck is empty.");
     }
     else {
         if(show_answer == HIDE_ANSWER) { // Only render the question.
             strncpy(content_buffer, card->question, MAX_CARD_ANSWER);
-            word_wrap(content_buffer, CONTENT_MAX_WIDTH - 10);
         }
         else { // Render both the question and the answer.
             strncat(content_buffer, card->question, MAX_CARD_QUESTION);
             strcat(content_buffer, "\n \n \n");
             strncat(content_buffer, card->answer, MAX_CARD_ANSWER-6);
-            word_wrap(content_buffer, CONTENT_MAX_WIDTH - 10);
         }
-        print_wrapped_lines(gui->content, content_buffer, 4, 10);
+        word_wrap(content_buffer, CONTENT_WIDTH - CONTENT_PADDING_X);
+        print_wrapped_lines(gui->content, content_buffer, CONTENT_PADDING_Y, CONTENT_PADDING_X);
     }
+}
+
+void handle_terminal_resize(GUI *gui) {
+    recalculate_dimensions(gui);
+    render_gui(gui);
+    render_content(gui, gui->active_card, gui->answer_state, gui->content_buffer);
+    TERMINAL_RESIZED = 0;
+    wrefresh_all(gui);
 }
 
 #endif
