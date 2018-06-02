@@ -44,6 +44,7 @@ void content_driver(GUI *gui, const int action) {
             memset(gui->content_buffer, '\0', sizeof(char) * MAX_CARD_CONTENT);
             break;
     }
+    wrefresh(gui->content);
 }
 
 // Handle the deck navigation.
@@ -60,6 +61,8 @@ void navigation_driver(GUI *gui, const int action) {
     gui->active_card = gui->active_deck->top;
     render_content(gui, gui->active_card, HIDE_ANSWER, gui->content_buffer);
     memset(gui->content_buffer, '\0', sizeof(char) * MAX_CARD_CONTENT);
+    wrefresh(gui->content);
+    wrefresh(gui->navigation);
 }
 
 #endif

@@ -36,10 +36,13 @@ int main(int argc, char *argv[]) {
 
     int input_char = ' ';
     while((input_char = wgetch(gui->active_window)) != EXIT_CHAR) {
+        // Switch focus from navigation <-> content window.
         if(TERMINAL_RESIZED) {
             handle_terminal_resize(gui);
+            render_content(gui, gui->active_card, gui->answer_state, gui->content_buffer);
+            render_gui(gui);
+            wrefresh_all(gui);
         }
-        // Switch focus from navigation <-> content window.
         if(input_char == '\t') {
             if(gui->active_window == gui->navigation) {
                 gui->active_window = gui->content;
@@ -47,6 +50,9 @@ int main(int argc, char *argv[]) {
             else {
                 gui->active_window = gui->navigation;
             }
+            render_content(gui, gui->active_card, gui->answer_state, gui->content_buffer);
+            render_gui(gui);
+            wrefresh_all(gui);
             continue;
         }
 
@@ -81,11 +87,7 @@ int main(int argc, char *argv[]) {
                     continue;
             }
         }
-
-        if(TERMINAL_RESIZED) {
-            render_content(gui, gui->active_card, gui->answer_state, gui->content_buffer);
-            handle_terminal_resize(gui);
-        }
+        render_content(gui, gui->active_card, gui->answer_state, gui->content_buffer);
         render_gui(gui);
         wrefresh_all(gui);
     }

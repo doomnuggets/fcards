@@ -27,6 +27,7 @@
 volatile static sig_atomic_t TERMINAL_RESIZED = 0;
 
 void termina_resize_handler(int sig) {
+    perror("Terminal has been resized!");
     TERMINAL_RESIZED = 1;
 }
 
@@ -54,7 +55,7 @@ WINDOW *_new_navigation_window(GUI *gui) {
 
 // Prepare the GUI structure and return a pointer to it.
 GUI *new_gui(Deck **decks) {
-    GUI *gui = (GUI *)calloc(1, sizeof(GUI));
+    GUI *gui = calloc(1, sizeof(GUI));
     if(gui == NULL) {
         perror("new_gui: Failed to mallocate the GUI.");
         return NULL;
@@ -77,7 +78,7 @@ GUI *new_gui(Deck **decks) {
         gui->active_card = gui->active_deck->top;
     }
 
-    gui->content_buffer = (char *)calloc(MAX_CARD_CONTENT, sizeof(char));
+    gui->content_buffer = calloc(MAX_CARD_CONTENT, sizeof(char));
     if(gui->content_buffer == NULL) {
         perror("Failed to allocate content buffer.");
         free_gui(gui);
@@ -121,9 +122,16 @@ GUI *new_gui(Deck **decks) {
 
 /// Refresh all windows.
 void wrefresh_all(GUI *gui) {
-    refresh();
+    wrefresh(stdscr);
     wrefresh(gui->content);
     wrefresh(gui->navigation);
+}
+
+/// Clear all windows.
+void wclear_all(GUI *gui) {
+    wclear(stdscr);
+    wclear(gui->content);
+    wclear(gui->navigation);
 }
 
 void render_gui(GUI *gui) {
@@ -159,7 +167,7 @@ void render_gui(GUI *gui) {
     hline(0, gui->max_width);
     attroff(COLOR_PAIR(1));
 
-    // Restore the initial cursor position.
+    // Restore the cursor position.
     move(y, x);
 }
 
@@ -191,11 +199,15 @@ void render_content(GUI *gui, Card *card, const int show_answer, char *content_b
 }
 
 void handle_terminal_resize(GUI *gui) {
+    perror("Handling termnal resize");
+    unpost_menu(gui->menu);
     recalculate_dimensions(gui);
+    wclear_all(gui);
     render_gui(gui);
     render_content(gui, gui->active_card, gui->answer_state, gui->content_buffer);
-    TERMINAL_RESIZED = 0;
+    post_menu(gui->menu);
     wrefresh_all(gui);
+    TERMINAL_RESIZED = 0;
 }
 
 #endif

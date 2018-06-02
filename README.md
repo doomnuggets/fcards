@@ -1,6 +1,4 @@
-# C-Cards
-
-*No, this has nothing to do with credit cards.*
+# fcards
 
 This tool allows you to learn anything you want in the form of flash-cards.
 

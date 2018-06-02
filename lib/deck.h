@@ -52,12 +52,12 @@ Deck *new_deck(char *name) {
     if(name == NULL) {
         return NULL;
     }
-    Deck *d = (Deck *)calloc(1, sizeof(Deck));
+    Deck *d = calloc(1, sizeof(Deck));
     if(d == NULL) {
         perror("Failed to allocate space for a new deck.");
         return NULL;
     }
-    d->name = (char *)calloc(MAX_DECK_NAME+1, sizeof(char));
+    d->name = calloc(MAX_DECK_NAME+1, sizeof(char));
     if(d->name == NULL) {
         perror("Failed to allocate space for the deck name.");
         free_deck(d);
