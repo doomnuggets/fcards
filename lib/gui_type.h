@@ -15,8 +15,6 @@
 | deck 3  |                      |
 | ...     |                      |
 |         |                      |
-|_________|______________________|
-| FOOTER                         |
 *--------------------------------*
  */
 
@@ -28,7 +26,6 @@ typedef struct GUI {
     char *content_buffer;
     WINDOW *navigation;
     WINDOW *content;
-    WINDOW *footer;
     WINDOW *active_window;
     Deck *active_deck;
     Deck **decks;

@@ -24,16 +24,12 @@ int NAVIGATION_HEIGHT = 0;
 int CONTENT_WIDTH = 0;
 int CONTENT_HEIGHT = 0;
 
-int FOOTER_WIDTH = 0;
-int FOOTER_HEIGHT = 2;
-
 void recalculate_dimensions(GUI *gui) {
     getmaxyx(stdscr, gui->max_height, gui->max_width);
     NAVIGATION_WIDTH = (int)(gui->max_width / 4);
     CONTENT_WIDTH = (int)(((gui->max_width / 4) * 3) - CONTENT_PADDING_X);
-    FOOTER_WIDTH = (int)(gui->max_width);
-    NAVIGATION_HEIGHT = (int)(gui->max_height - FOOTER_HEIGHT - 2);
-    CONTENT_HEIGHT = (int)(gui->max_height - FOOTER_HEIGHT - 2);
+    NAVIGATION_HEIGHT = (int)(gui->max_height - 2);
+    CONTENT_HEIGHT = (int)(gui->max_height - 2);
 }
 
 #endif

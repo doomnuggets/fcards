@@ -20,8 +20,6 @@
 | deck 2  |                      |
 | deck 3  |                      |
 | ...     |                      |
-|_________|______________________|
-| FOOTER                         |
 *--------------------------------*
 */
 
@@ -37,7 +35,6 @@ void free_gui(GUI *gui) {
     free(gui->content_buffer);
     destroy_win(gui->navigation);
     destroy_win(gui->content);
-    destroy_win(gui->footer);
     unpost_menu(gui->menu);
     free_menu(gui->menu);
     for(int i = 0; i < gui->num_menu_items; i++) {
@@ -48,15 +45,11 @@ void free_gui(GUI *gui) {
 }
 
 WINDOW *_new_content_window(GUI *gui) {
-    return newwin(CONTENT_HEIGHT, CONTENT_WIDTH, 1, NAVIGATION_WIDTH + 2);
+    return newwin(CONTENT_HEIGHT, CONTENT_WIDTH, 1, NAVIGATION_WIDTH + 1);
 }
 
 WINDOW *_new_navigation_window(GUI *gui) {
     return newwin(NAVIGATION_HEIGHT, NAVIGATION_WIDTH, 1, 0);
-}
-
-WINDOW *_new_footer_window(GUI *gui) {
-    return newwin(FOOTER_HEIGHT, FOOTER_WIDTH, gui->max_height - FOOTER_HEIGHT, 0);
 }
 
 // Prepare the GUI structure and return a pointer to it.
@@ -71,7 +64,6 @@ GUI *new_gui(Deck **decks) {
     gui->max_width = 0;
     gui->navigation = NULL;
     gui->content = NULL;
-    gui->footer = NULL;
     gui->decks = decks;
     gui->active_deck = NULL;
     gui->active_card = NULL;
@@ -103,14 +95,6 @@ GUI *new_gui(Deck **decks) {
     }
     keypad(gui->content, TRUE);
 
-    gui->footer = _new_footer_window(gui);
-    if(gui->footer == NULL) {
-        perror("Failed to initialize footer window.");
-        free_gui(gui);
-        return NULL;
-    }
-    keypad(gui->footer, TRUE);
-
     gui->navigation = _new_navigation_window(gui);
     if(gui->navigation == NULL) {
         perror("Failed to initialize navigation window.");
@@ -138,7 +122,6 @@ GUI *new_gui(Deck **decks) {
 /// Refresh all windows.
 void wrefresh_all(GUI *gui) {
     refresh();
-    wrefresh(gui->footer);
     wrefresh(gui->content);
     wrefresh(gui->navigation);
 }
@@ -146,6 +129,7 @@ void wrefresh_all(GUI *gui) {
 void render_gui(GUI *gui) {
     int x;
     int y;
+    // Store the initial cursor position.
     getyx(stdscr, y, x);
 
     init_pair(1, COLOR_BLUE, COLOR_BLUE); // horizontal blue bar.
@@ -160,21 +144,22 @@ void render_gui(GUI *gui) {
     // Draw the titles.
     attron(COLOR_PAIR(2));
     mvwprintw(stdscr, 0, 1, "Decks");
-    mvwprintw(stdscr, 0, NAVIGATION_WIDTH + 3, "Cards");
+    mvwprintw(stdscr, 0, NAVIGATION_WIDTH + 4, "Cards");
     attroff(COLOR_PAIR(2));
 
     // Draw the vertical bar which separates the navigation from the content.
-    wmove(stdscr, 1, NAVIGATION_WIDTH + 1);
+    wmove(stdscr, 1, NAVIGATION_WIDTH);
     attron(COLOR_PAIR(3));
-    vline(0, gui->max_height - FOOTER_HEIGHT - 1);
+    vline(0, gui->max_height - 1);
     attroff(COLOR_PAIR(3));
 
-    // Draw horizontal bar just above the footer.
-    wmove(stdscr, gui->max_height - FOOTER_HEIGHT - 1, 0);
+    // Draw the horizontal bar just above the end of the window.
+    wmove(stdscr, gui->max_height - 1, 0);
     attron(COLOR_PAIR(1));
     hline(0, gui->max_width);
     attroff(COLOR_PAIR(1));
 
+    // Restore the initial cursor position.
     move(y, x);
 }
 
